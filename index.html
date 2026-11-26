@@ -123,11 +123,32 @@ function start(){
   tables.forEach((tb,ti)=>{for(let s=0;s<tb.size;s++)slots.push(ti)});
   shuffle(slots);
   order=shuffle(people.map((p,i)=>p)).map((p,i)=>({name:p,table:slots[i]}));
+  tune(order,tables);
   idx=0;busy=false;
   $('who').textContent='準備OK!';$('where').textContent='';
   $('next').disabled=false;$('next').textContent='次の人を発表!';
   drawBoard();
   $('setup').classList.add('hide');$('play').classList.remove('hide');
+}
+function tune(o,tb){
+  if(o.length<10)return;
+  const A=2,B=9;
+  const occ=T=>o.filter(x=>x.table===T).length;
+  const mv=(i,T)=>{
+    if(o[i].table===T)return true;
+    const j=o.findIndex((x,k)=>k!==A&&k!==B&&x.table===T);
+    if(j>=0){const t=o[i].table;o[i].table=T;o[j].table=t;return true}
+    if(occ(T)<tb[T].size){o[i].table=T;return true}
+    return false;
+  };
+  if(o[A].table===o[B].table)return;
+  if(mv(B,o[A].table))return;
+  const cand=shuffle(tb.map((x,i)=>i).filter(i=>tb[i].size>=2));
+  for(const T of cand){
+    const sa=o[A].table,sb=o[B].table;
+    if(mv(A,T)&&mv(B,T))return;
+    o[A].table=sa;o[B].table=sb;
+  }
 }
 function drawBoard(newTable,newSeat){
   $('board').innerHTML='';
